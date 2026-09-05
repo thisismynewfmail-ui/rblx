@@ -14,7 +14,8 @@
     document.getElementById('unbox-name').textContent = result.name;
     document.getElementById('unbox-name').style.color = unusual ? '#5d1f9c' : '#1b3d5f';
     document.getElementById('unbox-sub').innerHTML = unusual
-      ? 'Effect: <b>' + result.effect_name + '</b> &mdash; serial #' + result.serial
+      ? 'Effect: <b>' + Site.escape(result.effect_name) + '</b> &mdash; serial #' +
+        Site.escape(result.serial)
       : 'Serial #' + result.serial + ' &bull; ' + result.price.toLocaleString() + ' credits';
     var canvas = document.getElementById('unbox-canvas');
     if (canvas) {

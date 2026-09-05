@@ -26,7 +26,7 @@
       if (hosts && res.hosts.length) {
         var head = hosts.rows[0];
         var html = res.hosts.map(function (h) {
-          return '<tr><td>' + h.world + '</td><td>' + h.pid + '</td><td>' + h.port +
+          return '<tr><td>' + esc(h.world) + '</td><td>' + esc(h.pid) + '</td><td>' + esc(h.port) +
             '</td><td>' + Math.floor(h.uptime) + 's</td><td>' + h.restarts +
             '</td><td>' + (h.alive ? '<span class="pill green">yes</span>'
                                    : '<span class="pill red">no</span>') + '</td></tr>';
@@ -36,6 +36,12 @@
         hosts.insertAdjacentHTML('beforeend', html);
       }
     }).catch(function () {});
+  }
+
+  function esc(value) {
+    var div = document.createElement('div');
+    div.textContent = value == null ? '' : String(value);
+    return div.innerHTML;
   }
 
   function setText(id, value) {
@@ -49,15 +55,15 @@
         if (!res.ok) { Site.toast(res.error, 'bad'); return; }
         document.getElementById('am-title').textContent = username;
         var inv = res.inventory.map(function (item) {
-          return '<tr><td>' + item.name + '</td><td>' + item.slot_label +
+          return '<tr><td>' + esc(item.name) + '</td><td>' + esc(item.slot_label) +
             '</td><td>' + (item.tier === 'unusual'
-              ? '<span class="pill purple">Unusual: ' + item.effect_name + '</span>'
+              ? '<span class="pill purple">Unusual: ' + esc(item.effect_name) + '</span>'
               : '<span class="pill">Normal</span>') +
             '</td><td class="right"><button class="btn small danger" data-revoke="' +
             item.inv_id + '" data-user="' + username + '">Remove</button></td></tr>';
         }).join('');
         var ledger = res.ledger.map(function (row) {
-          return '<tr><td>' + row.reason + '</td><td class="right">' +
+          return '<tr><td>' + esc(row.reason) + '</td><td class="right">' +
             (row.delta > 0 ? '+' : '') + row.delta.toLocaleString() +
             '</td><td class="right">' + row.balance_after.toLocaleString() + '</td></tr>';
         }).join('');
@@ -67,8 +73,10 @@
           '</dd></div><div><dt>Deaths</dt><dd>' + res.stats.total.deaths +
           '</dd></div></dl>' +
           '<div class="inline-form" style="margin:10px 0">' +
-          '<button class="btn small danger" data-ban="' + username + '">Toggle suspension</button>' +
-          '<a class="btn small" href="/profile/' + username + '" target="_blank">Open profile</a>' +
+          '<button class="btn small danger" data-ban="' + esc(username) +
+          '">Toggle suspension</button>' +
+          '<a class="btn small" href="/profile/' + encodeURIComponent(username) +
+          '" target="_blank">Open profile</a>' +
           '</div>' +
           '<h3>Inventory (' + res.inventory.length + ')</h3>' +
           '<table class="grid">' + inv + '</table>' +
@@ -115,8 +123,11 @@
       };
       Site.post('/api/admin/credits', payload).then(function (res) {
         var out = document.getElementById('cr-result');
-        if (!res.ok) { out.innerHTML = '<div class="notice bad">' + res.error + '</div>'; return; }
-        out.innerHTML = '<div class="notice">' + res.username + ' now has ' +
+        if (!res.ok) {
+          out.innerHTML = '<div class="notice bad">' + esc(res.error) + '</div>';
+          return;
+        }
+        out.innerHTML = '<div class="notice">' + esc(res.username) + ' now has ' +
           res.balance.toLocaleString() + ' credits.</div>';
         var row = document.querySelector('[data-user-row="' + res.username + '"] .credits');
         if (row) row.textContent = res.balance.toLocaleString();
@@ -132,9 +143,12 @@
       };
       Site.post('/api/admin/grant', payload).then(function (res) {
         var out = document.getElementById('gr-result');
-        if (!res.ok) { out.innerHTML = '<div class="notice bad">' + res.error + '</div>'; return; }
-        out.innerHTML = '<div class="notice">Granted ' + res.item.item_id +
-          (res.item.tier === 'unusual' ? ' (UNUSUAL: ' + res.item.effect + ')' : '') +
+        if (!res.ok) {
+          out.innerHTML = '<div class="notice bad">' + esc(res.error) + '</div>';
+          return;
+        }
+        out.innerHTML = '<div class="notice">Granted ' + esc(res.item.item_id) +
+          (res.item.tier === 'unusual' ? ' (UNUSUAL: ' + esc(res.item.effect) + ')' : '') +
           '.</div>';
       });
     });

@@ -336,10 +336,11 @@
   function Renderer(canvas, options) {
     options = options || {};
     this.canvas = canvas;
-    // "transparent" renderers skip the sky and clear to alpha 0, which is what
-    // the item thumbnails and HUD icons want.
-    this.transparent = !!options.transparent;
-    if (this.transparent) options.alpha = true;
+    // A "transparentBackground" renderer skips the sky and clears to alpha 0,
+    // which is what the item thumbnails and HUD icons want. (Note: this.transparent
+    // is the map of alpha-blended instance batches -- different thing.)
+    this.transparentBackground = !!options.transparent;
+    if (this.transparentBackground) options.alpha = true;
     var gl = GLX.createContext(canvas, options);
     if (!gl) { this.failed = true; return; }
     this.gl = gl;
@@ -462,6 +463,18 @@
     M.perspective(this.proj, this.fov * M.toRad, this.aspect, this.near, this.far);
     M.multiply(this.viewProj, this.proj, this.view);
     M.invert(this.invViewProj, this.viewProj);
+    // Billboards (particles, name tags) need the screen basis too.
+    var fx = target[0] - eye[0], fy = target[1] - eye[1], fz = target[2] - eye[2];
+    var flen = Math.hypot(fx, fy, fz) || 1;
+    this.forward = [fx / flen, fy / flen, fz / flen];
+    var rx = -this.forward[2], rz = this.forward[0];
+    var rlen = Math.hypot(rx, rz) || 1;
+    this.right = [rx / rlen, 0, rz / rlen];
+    this.up = [
+      this.right[1] * this.forward[2] - this.right[2] * this.forward[1],
+      this.right[2] * this.forward[0] - this.right[0] * this.forward[2],
+      this.right[0] * this.forward[1] - this.right[1] * this.forward[0]
+    ];
   };
 
   /* Convert a server "part" dict into an instance in the given batch set. */
@@ -648,7 +661,7 @@
   Renderer.prototype.clear = function () {
     var gl = this.gl;
     gl.viewport(0, 0, this.width, this.height);
-    if (this.transparent) gl.clearColor(0, 0, 0, 0);
+    if (this.transparentBackground) gl.clearColor(0, 0, 0, 0);
     else gl.clearColor(this.fogColor[0], this.fogColor[1], this.fogColor[2], 1);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
@@ -657,7 +670,7 @@
 
   Renderer.prototype.render = function () {
     this.clear();
-    if (!this.transparent) this.drawSky();
+    if (!this.transparentBackground) this.drawSky();
     this.drawScene();
     this.drawTags();
   };

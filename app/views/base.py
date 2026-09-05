@@ -132,9 +132,16 @@ def api_ok(**payload: Any) -> Response:
 
 
 def to_json(value: Any) -> str:
-    """JSON for embedding in an HTML attribute (the template escapes quotes)."""
+    """JSON safe to embed either in an HTML attribute or inside <script>.
+
+    The template escapes quotes for the attribute case; the replacements here
+    stop a value from closing the script tag or breaking a JS string.
+    """
     import json
-    return json.dumps(value, separators=(",", ":"), default=str)
+    text = json.dumps(value, separators=(",", ":"), default=str)
+    return (text.replace("<", "\\u003c").replace(">", "\\u003e")
+                .replace("&", "\\u0026")
+                .replace("\u2028", "\\u2028").replace("\u2029", "\\u2029"))
 
 
 # ------------------------------------------------------------------ filters

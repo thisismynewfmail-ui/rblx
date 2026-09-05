@@ -285,7 +285,7 @@
     var renderer = ensureRenderer();
     if (!renderer) return;
     var parts = worldScene(kind, colors);
-    renderer.transparent = false;
+    renderer.transparentBackground = false;
     var previous = { w: renderer.canvas.width, h: renderer.canvas.height };
     renderer.canvas.width = 512;
     renderer.canvas.height = 288;
@@ -301,7 +301,7 @@
     copy.getContext('2d').drawImage(renderer.canvas, 0, 0);
     Thumbs.imageCache[key] = copy;
     blit(canvas, copy);
-    renderer.transparent = true;
+    renderer.transparentBackground = true;
     renderer.canvas.width = previous.w;
     renderer.canvas.height = previous.h;
     renderer.width = previous.w; renderer.height = previous.h;
