@@ -6,7 +6,7 @@ from ..http.router import Request
 from ..game import registry as game_registry
 from ..models import avatars, inventory, users, worlds
 from ..social import feed, follows, friends, posts
-from .base import login_required, render, router
+from .base import render, router
 
 
 @router.get("/")

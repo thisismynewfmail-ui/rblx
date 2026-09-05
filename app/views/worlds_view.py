@@ -1,14 +1,12 @@
 """World browser, world detail pages and the in-browser Game View."""
 from __future__ import annotations
 
-import time
-
 from .. import config, db, security
 from ..game import registry as game_registry
 from ..http import router as R
 from ..http.router import Request
 from ..models import avatars, users, worlds
-from .base import (api_error, api_ok, login_required, render, router)
+from .base import api_error, api_ok, login_required, render, router
 
 
 def _world_rows(viewer_id: int = 0):

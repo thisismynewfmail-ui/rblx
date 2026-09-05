@@ -128,8 +128,6 @@ def sell_back(user_id: int, inv_id: int) -> Dict[str, Any]:
                              (inv_id, user_id)).fetchone()
         if owned is None:
             raise MarketError("You do not own that item.")
-        avatar = conn.execute("SELECT equipped, hotbar FROM avatars WHERE user_id=?",
-                              (user_id,)).fetchone()
         conn.execute("DELETE FROM inventory WHERE id=? AND user_id=?",
                      (inv_id, user_id))
         if refund > 0:
@@ -142,7 +140,6 @@ def sell_back(user_id: int, inv_id: int) -> Dict[str, Any]:
                 "INSERT INTO credit_ledger(user_id,delta,balance_after,reason,"
                 "actor_id,created_at) VALUES(?,?,?,?,?,?)",
                 (user_id, refund, new_balance, "Sold %s" % item["name"], None, now))
-        del avatar
     from . import avatars
     avatars.unequip_missing(user_id)
     db.audit(user_id, "market.sell", row["item_id"], {"refund": refund})

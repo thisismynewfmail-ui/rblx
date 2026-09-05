@@ -336,6 +336,10 @@
   function Renderer(canvas, options) {
     options = options || {};
     this.canvas = canvas;
+    // "transparent" renderers skip the sky and clear to alpha 0, which is what
+    // the item thumbnails and HUD icons want.
+    this.transparent = !!options.transparent;
+    if (this.transparent) options.alpha = true;
     var gl = GLX.createContext(canvas, options);
     if (!gl) { this.failed = true; return; }
     this.gl = gl;
@@ -621,7 +625,6 @@
     gl.vertexAttribDivisor(p.attribs.aQuad, 0);
     gl.vertexAttribPointer(p.attribs.aQuad, 2, gl.FLOAT, false, 0, 0);
     gl.uniformMatrix4fv(p.uniforms.uViewProj, false, this.viewProj);
-    var right = this.right || [1, 0, 0];
     var camUp = [0, 1, 0];
     var fwd = this.forward || [0, 0, 1];
     var flen = Math.hypot(fwd[0], fwd[1], fwd[2]) || 1;
@@ -640,13 +643,13 @@
       gl.drawArrays(gl.TRIANGLES, 0, 6);
     }
     gl.depthMask(true);
-    var _ = right;
   };
 
   Renderer.prototype.clear = function () {
     var gl = this.gl;
     gl.viewport(0, 0, this.width, this.height);
-    gl.clearColor(this.fogColor[0], this.fogColor[1], this.fogColor[2], 1);
+    if (this.transparent) gl.clearColor(0, 0, 0, 0);
+    else gl.clearColor(this.fogColor[0], this.fogColor[1], this.fogColor[2], 1);
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -654,7 +657,7 @@
 
   Renderer.prototype.render = function () {
     this.clear();
-    this.drawSky();
+    if (!this.transparent) this.drawSky();
     this.drawScene();
     this.drawTags();
   };

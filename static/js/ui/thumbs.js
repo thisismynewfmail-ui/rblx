@@ -23,7 +23,8 @@
     canvas.style.position = 'absolute';
     canvas.style.left = '-10000px';
     document.body.appendChild(canvas);
-    var renderer = new Renderer(canvas, { preserveDrawingBuffer: true, antialias: true });
+    var renderer = new Renderer(canvas, { preserveDrawingBuffer: true,
+                                          antialias: true, transparent: true });
     if (renderer.failed) { Thumbs.failed = true; return null; }
     renderer.renderScale = 1;
     renderer.pixelRatio = 1;
@@ -134,7 +135,7 @@
                  decSlot: piece.decal ? Textures.decal(piece.decal) : null };
       });
       if (!parts.length) parts.push({ t: 'box', p: [0, 0, 0], s: [1, 1, 1], c: '#c8cbcd' });
-      return { parts: parts, angle: -0.6, tilt: 0.32, padding: 1.7,
+      return { parts: parts, angle: -0.62, tilt: 0.15, padding: 1.55,
                anchor: [0, 0.35, 0] };
     }
     if (slot === 'usable') {
@@ -284,6 +285,7 @@
     var renderer = ensureRenderer();
     if (!renderer) return;
     var parts = worldScene(kind, colors);
+    renderer.transparent = false;
     var previous = { w: renderer.canvas.width, h: renderer.canvas.height };
     renderer.canvas.width = 512;
     renderer.canvas.height = 288;
@@ -299,6 +301,7 @@
     copy.getContext('2d').drawImage(renderer.canvas, 0, 0);
     Thumbs.imageCache[key] = copy;
     blit(canvas, copy);
+    renderer.transparent = true;
     renderer.canvas.width = previous.w;
     renderer.canvas.height = previous.h;
     renderer.width = previous.w; renderer.height = previous.h;

@@ -345,18 +345,8 @@
       self.hud.setCoins(msg.c);
     });
     net.on('tycoon_init', function (msg) {
-      self.myPlot = msg.your_plot;
-      self.coins = msg.coins;
-      self.hud.setCoins(msg.coins);
-      if (self.extras) {
-        self.extras.setPlots(msg.plots);
-        (msg.plots || []).forEach(function (plot) {
-          (plot.geometry || []).forEach(function (geo) {
-            self.extras.builtGeometry[plot.index + ':' + geo.id] = geo.parts || [];
-          });
-        });
-        self.rebuildStatic();
-      }
+      if (!self.extras) { self.pendingTycoonInit = msg; return; }
+      self.applyTycoonInit(msg);
     });
     net.on('tycoon_state', function (msg) {
       if (self.extras) self.extras.setPlots(msg.plots);
@@ -434,8 +424,27 @@
     this.onState(this.state);
     var badge = document.getElementById('instance-badge');
     if (badge) badge.textContent = 'instance #' + msg.world.instance;
+    if (this.pendingTycoonInit) {
+      this.applyTycoonInit(this.pendingTycoonInit);
+      this.pendingTycoonInit = null;
+    }
     this.hud.setLoading(100, 'Ready. Click to play.');
     this.hud.toast('Click the screen to lock the mouse. Press <b>Y</b> to chat.', '', true);
+  };
+
+  Client.prototype.applyTycoonInit = function (msg) {
+    this.myPlot = msg.your_plot;
+    this.coins = msg.coins;
+    this.hud.setCoins(msg.coins);
+    if (!this.extras) return;
+    this.extras.setPlots(msg.plots);
+    var self = this;
+    (msg.plots || []).forEach(function (plot) {
+      (plot.geometry || []).forEach(function (geo) {
+        self.extras.builtGeometry[plot.index + ':' + geo.id] = geo.parts || [];
+      });
+    });
+    this.rebuildStatic();
   };
 
   Client.prototype.addPlayer = function (data) {

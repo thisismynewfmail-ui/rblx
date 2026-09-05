@@ -25,7 +25,7 @@ import math
 import random
 import threading
 import time
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 from ..models import catalog
 
@@ -265,7 +265,14 @@ class GameInstance:
         """Subclass hook, called every tick with the state lock held."""
 
     def on_player_join(self, player: Player) -> None:
-        pass
+        """State changes for a joining player (team assignment and so on)."""
+
+    def on_player_ready(self, player: Player) -> None:
+        """Called once the welcome payload has been sent.
+
+        Anything a world wants to *send* a joining player belongs here, so the
+        client can rely on ``welcome`` always arriving first.
+        """
 
     def on_player_leave(self, player: Player) -> None:
         pass
@@ -426,6 +433,7 @@ class GameInstance:
             player.send(payload)
             self.broadcast({"t": "join", "player": player.public()},
                            exclude=pid)
+            self.on_player_ready(player)
             self.system_message("%s joined the server." % username)
             return player
 

@@ -9,7 +9,7 @@
   GLX.createContext = function (canvas, opts) {
     opts = opts || {};
     var attrs = {
-      alpha: false,
+      alpha: !!opts.alpha,
       antialias: opts.antialias !== false,
       depth: true,
       stencil: false,

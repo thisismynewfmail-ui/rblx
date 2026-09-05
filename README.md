@@ -213,11 +213,16 @@ up everywhere at once.
 
 ```bash
 tools/devserver.sh start --port 8972    # start/stop/restart/log helper
+tools/sitetests.py                      # HTTP-level tests for the website
 tools/checkmaps.py                      # static map validation
 tools/simclient.py --world capture_the_flag --bots 4 --seconds 20
 tools/gametests.py                      # full gameplay test suite
 tools/gametests.py ctf combat tycoon    # or a subset
 ```
+
+`BLOCKHAVEN_TYCOON_COINS=200000 python3 main.py` starts every Burger Tycoon
+crew with a large float, which is handy when you want to look at a finished
+restaurant without building one first.
 
 `gametests.py` drives real websocket clients against the running servers and
 asserts on what the servers broadcast: flag captures, damage and the kill feed,

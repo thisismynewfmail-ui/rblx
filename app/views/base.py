@@ -5,7 +5,7 @@ import functools
 import time
 from typing import Any, Callable, Dict, Optional
 
-from .. import config, db, security
+from .. import config, security
 from ..http import router as R
 from ..http.router import Request, Response
 from ..models import users

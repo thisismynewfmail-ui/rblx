@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import random
 import time
-from typing import List
 
 from . import config, db
 from .models import avatars, catalog, inventory, users, worlds

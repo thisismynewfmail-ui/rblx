@@ -279,7 +279,6 @@ def test_payload() -> None:
                                                 final.get("progress", 0)))
         check("payload: pushers counted", final.get("pushers", 0) >= 1,
               json.dumps(final)[:140])
-        del others
     finally:
         for bot in bots:
             bot.stop()
@@ -447,7 +446,6 @@ def test_instances() -> None:
         check("instances: no instance exceeds its capacity",
               all(i["count"] <= i["max"] for i in ctf["instance_list"]),
               json.dumps(ctf["instance_list"]))
-        del instances
     finally:
         for bot in bots:
             bot.stop()

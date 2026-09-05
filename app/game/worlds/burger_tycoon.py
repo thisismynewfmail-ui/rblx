@@ -11,6 +11,7 @@ converted to site credits and never touch the accounts database.
 from __future__ import annotations
 
 import math
+import os
 import time
 from typing import Any, Dict, List, Optional
 
@@ -18,7 +19,9 @@ from ..instance import GameInstance, Player, now
 from ..maps import tycoon as tycoon_map
 
 PLOT_CAPACITY = 4
-START_COINS = 200
+# Starting float for a fresh crew. Override with BLOCKHAVEN_TYCOON_COINS
+# when you want to look at a finished restaurant without grinding one.
+START_COINS = int(os.environ.get("BLOCKHAVEN_TYCOON_COINS", "200"))
 COLLECTOR_LOCAL = [-44.0, 0.0, 34.0]
 CLAIM_LOCAL = [0.0, 0.0, 44.0]
 BUTTON_RADIUS = 7.0
@@ -45,12 +48,12 @@ def U(uid, name, cost, income=0.0, req=None, active=None, button=None,
 
 
 UPGRADES: List[Dict[str, Any]] = [
-    U("floor", "Restaurant Floor", 75, 1.0, [], None, [-30, 0, 30], [
+    U("floor", "Restaurant Floor", 75, 2.0, [], None, [-30, 0, 30], [
         {"t": "box", "p": [0, 0.4, -10], "s": [78, 0.8, 52], "c": TILE, "st": 1},
         {"t": "box", "p": [0, 0.5, -10], "s": [70, 0.8, 44], "c": "#f5f5ef"},
     ], "A clean tiled floor. Every empire starts here."),
 
-    U("grill", "Basic Grill", 150, 3.0, ["floor"], None, [-30, 0, 18], [
+    U("grill", "Basic Grill", 150, 5.0, ["floor"], None, [-30, 0, 18], [
         {"t": "box", "p": [-22, 2.6, -28], "s": [22, 5.2, 10], "c": METAL,
          "m": "metal"},
         {"t": "box", "p": [-22, 5.6, -28], "s": [20, 0.8, 8], "c": "#3b3b3b"},
@@ -60,7 +63,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "metal"},
     ], "Two patties at a time. It is a start."),
 
-    U("counter", "Service Counter", 400, 5.0, ["grill"], None, [-30, 0, 6], [
+    U("counter", "Service Counter", 400, 9.0, ["grill"], None, [-30, 0, 6], [
         {"t": "box", "p": [0, 3.0, 8], "s": [52, 6.0, 6], "c": WOOD},
         {"t": "box", "p": [0, 6.4, 8], "s": [56, 0.8, 8], "c": "#d9b88a"},
         {"t": "box", "p": [18, 8.4, 8], "s": [8, 4.0, 5], "c": "#2f3640"},
@@ -68,7 +71,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "neon"},
     ], "Somewhere for the queue to end."),
 
-    U("walls", "Walls & Windows", 700, 4.0, ["counter"], None, [30, 0, 30], [
+    U("walls", "Walls & Windows", 700, 7.0, ["counter"], None, [30, 0, 30], [
         {"t": "box", "p": [0, 11, -35], "s": [76, 22, 3], "c": BRICK},
         {"t": "box", "p": [-37, 11, -10], "s": [3, 22, 53], "c": BRICK},
         {"t": "box", "p": [37, 11, -10], "s": [3, 22, 53], "c": BRICK},
@@ -83,7 +86,7 @@ UPGRADES: List[Dict[str, Any]] = [
     ], "Weatherproofing. The health inspector insisted."),
 
     U("fryer", "Fry Station", 1100, 0.0, ["walls"],
-      {"payout": 60, "cooldown": 3.5, "pos": [16, 0, -26],
+      {"payout": 95, "cooldown": 3.5, "pos": [16, 0, -26],
        "label": "Cook fries"}, [30, 0, 18], [
         {"t": "box", "p": [16, 3.0, -28], "s": [18, 6.0, 9], "c": METAL,
          "m": "metal"},
@@ -93,7 +96,7 @@ UPGRADES: List[Dict[str, Any]] = [
         {"t": "cyl", "p": [26, 4.0, -28], "s": [5, 8.0, 5], "c": "#c9a227"},
     ], "Hands-on income: stand here and press E for a batch."),
 
-    U("roof", "Roof & Trim", 1600, 6.0, ["walls"], None, [30, 0, 6], [
+    U("roof", "Roof & Trim", 1600, 11.0, ["walls"], None, [30, 0, 6], [
         {"t": "box", "p": [0, 23.5, -10], "s": [82, 2.0, 58], "c": RED,
          "st": 1},
         {"t": "box", "p": [0, 25.5, -10], "s": [76, 2.0, 52], "c": "#a3221a"},
@@ -102,7 +105,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "metal"},
     ], "Keeps the rain off the fryer."),
 
-    U("sign", "Neon Sign", 2200, 9.0, ["roof"], None, [-30, 0, -6], [
+    U("sign", "Neon Sign", 2200, 16.0, ["roof"], None, [-30, 0, -6], [
         {"t": "box", "p": [0, 31.0, 15], "s": [46, 10, 2], "c": "#2f3640"},
         {"t": "box", "p": [0, 31.0, 16.4], "s": [42, 7.4, 0.6], "c": YELLOW,
          "m": "neon", "dec": "burger"},
@@ -110,7 +113,7 @@ UPGRADES: List[Dict[str, Any]] = [
         {"t": "cyl", "p": [20, 27.5, 15], "s": [2, 7, 2], "c": METAL},
     ], "Visible from the plaza. Free advertising."),
 
-    U("grill2", "Double Grill", 3000, 14.0, ["sign"], None, [-30, 0, -18], [
+    U("grill2", "Double Grill", 3000, 25.0, ["sign"], None, [-30, 0, -18], [
         {"t": "box", "p": [-22, 2.6, -16], "s": [22, 5.2, 10], "c": METAL,
          "m": "metal"},
         {"t": "box", "p": [-22, 5.6, -16], "s": [20, 0.8, 8], "c": "#3b3b3b"},
@@ -121,7 +124,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "metal"},
     ], "Twice the patties, twice the profit."),
 
-    U("seating", "Seating Area", 4200, 18.0, ["grill2"], None, [30, 0, -6], [
+    U("seating", "Seating Area", 4200, 32.0, ["grill2"], None, [30, 0, -6], [
         {"t": "box", "p": [0, 0.4, 34], "s": [76, 0.8, 30], "c": "#cfd4d8",
          "st": 1},
         {"t": "cyl", "p": [-24, 3.0, 30], "s": [10, 6, 10], "c": "#e2e2da"},
@@ -135,7 +138,7 @@ UPGRADES: List[Dict[str, Any]] = [
         {"t": "box", "p": [24, 9.0, 30], "s": [3, 5, 3], "c": YELLOW},
     ], "Customers linger. Lingering customers buy dessert."),
 
-    U("drivethru", "Drive-Thru", 6000, 28.0, ["seating"], None, [30, 0, -18], [
+    U("drivethru", "Drive-Thru", 6000, 50.0, ["seating"], None, [30, 0, -18], [
         {"t": "box", "p": [-52, 0.3, -6], "s": [18, 0.6, 66], "c": "#6d6e6c"},
         {"t": "box", "p": [-52, 0.5, -6], "s": [2, 0.8, 60], "c": "#f5e07a"},
         {"t": "box", "p": [-40, 6.0, 4], "s": [6, 12, 8], "c": BRICK},
@@ -150,7 +153,7 @@ UPGRADES: List[Dict[str, Any]] = [
     ], "They never even leave the car."),
 
     U("freezer", "Walk-in Freezer", 8500, 0.0, ["drivethru"],
-      {"payout": 240, "cooldown": 6.0, "pos": [30, 0, -30],
+      {"payout": 380, "cooldown": 6.0, "pos": [30, 0, -30],
        "label": "Restock freezer"}, [-30, 0, -30], [
         {"t": "box", "p": [30, 8.0, -30], "s": [20, 16, 14], "c": "#dfe6ea",
          "m": "metal"},
@@ -161,7 +164,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "neon"},
     ], "Cold storage. Restock it by hand for a big payout."),
 
-    U("floor2", "Second Floor", 12000, 40.0, ["freezer"], None, [30, 0, -30], [
+    U("floor2", "Second Floor", 12000, 72.0, ["freezer"], None, [30, 0, -30], [
         {"t": "box", "p": [0, 26.5, -10], "s": [78, 1.6, 54], "c": TILE,
          "st": 1},
         {"t": "box", "p": [0, 37, -35], "s": [76, 20, 3], "c": BRICK},
@@ -177,7 +180,7 @@ UPGRADES: List[Dict[str, Any]] = [
          "m": "metal"},
     ], "Upstairs dining. Very fancy."),
 
-    U("rooftop", "Rooftop Garden", 17000, 60.0, ["floor2"], None, [-30, 0, -30], [
+    U("rooftop", "Rooftop Garden", 17000, 105.0, ["floor2"], None, [-30, 0, -30], [
         {"t": "box", "p": [0, 49.5, -10], "s": [78, 2, 54], "c": "#5aa84f",
          "st": 1},
         {"t": "cyl", "p": [-24, 53, -24], "s": [4, 6, 4], "c": "#7c503a"},
@@ -188,7 +191,7 @@ UPGRADES: List[Dict[str, Any]] = [
         {"t": "box", "p": [-30, 52.5, -10], "s": [10, 4, 40], "c": "#8a5a2b"},
     ], "Herbs, hedges and a view of the plaza."),
 
-    U("arches", "Golden Arches", 26000, 90.0, ["rooftop"], None, [30, 0, 30], [
+    U("arches", "Golden Arches", 26000, 160.0, ["rooftop"], None, [30, 0, 30], [
         {"t": "torus", "p": [-16, 62, 8], "s": [26, 5, 26], "c": "#f5c518",
          "m": "metal"},
         {"t": "torus", "p": [16, 62, 8], "s": [26, 5, 26], "c": "#f5c518",
@@ -357,6 +360,11 @@ class BurgerTycoon(GameInstance):
             plot.claimed_at = now()
             self.system_message("%s claimed %s!" % (player.username, plot.name))
         self.broadcast_plot(plot, full=True)
+
+    def on_player_ready(self, player: Player) -> None:
+        plot = self.plot_of(player)
+        if plot is None:
+            return
         player.send({"t": "tycoon_init",
                      "plots": [p.payload(full=True) for p in self.plots],
                      "upgrades": [{"id": u["id"], "name": u["name"],

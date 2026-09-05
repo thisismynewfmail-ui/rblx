@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import math
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
-from ..instance import GameInstance, Player, now
+from ..instance import GameInstance, now
 from ..maps import payload as payload_map
 
 SETUP_SECONDS = 18.0

@@ -6,8 +6,7 @@ from ..http.router import Request
 from ..game import registry as game_registry
 from ..models import avatars, inventory, users, worlds
 from ..social import comments, follows, friends, posts
-from .base import (api_error, api_ok, flash_redirect, login_required, render,
-                   router)
+from .base import api_error, api_ok, login_required, render, router
 
 
 def _profile_or_404(username: str):

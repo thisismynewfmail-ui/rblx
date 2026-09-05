@@ -1,14 +1,11 @@
 """Sign up, sign in, sign out and account settings."""
 from __future__ import annotations
 
-import time
-
-from .. import config, db, security
+from .. import config, db
 from ..http import router as R
 from ..http.router import Request
-from ..models import avatars, users
-from .base import (api_error, api_ok, context, flash_redirect, login_required,
-                   render, router)
+from ..models import users
+from .base import flash_redirect, login_required, render, router
 
 SAFE_NEXT_PREFIXES = ("/",)
 
@@ -30,7 +27,13 @@ def login(req: Request):
     username = str(form.get("username", "")).strip()
     password = str(form.get("password", ""))
     ip = req.remote_addr
-    if not db.rate_limit("login:%s" % ip, 40, 300):
+    # Two limits: a tight one per account (that is what stops brute forcing)
+    # and a loose one per address, so a whole household behind one router --
+    # or a test run -- does not lock itself out.
+    if not db.rate_limit("login:user:%s" % username.lower()[:40], 12, 300):
+        return render(req, "login.html", next_url=next_url,
+                      error="Too many attempts for that account. Wait a minute.")
+    if not db.rate_limit("login:ip:%s" % ip, 150, 300):
         return render(req, "login.html", next_url=next_url,
                       error="Too many attempts from this address. Wait a minute.")
     try:
@@ -58,7 +61,7 @@ def register(req: Request):
     username = str(form.get("username", "")).strip()
     password = str(form.get("password", ""))
     confirm = str(form.get("confirm", ""))
-    if not db.rate_limit("register:%s" % req.remote_addr, 8, 3600):
+    if not db.rate_limit("register:%s" % req.remote_addr, 20, 3600):
         return render(req, "register.html", username=username,
                       error="Too many accounts created from here recently.")
     if password != confirm:

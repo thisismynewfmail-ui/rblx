@@ -16,7 +16,7 @@ from ..game import registry as game_registry
 from ..http import router as R
 from ..http.router import Request
 from ..models import avatars, catalog, economy, inventory, users, worlds
-from ..social import comments, feed, messages, posts
+from ..social import comments, feed, posts
 from .base import admin_required, api_error, api_ok, render, router
 
 SUPERVISOR = None  # set by main.py so the dashboard can show host processes
